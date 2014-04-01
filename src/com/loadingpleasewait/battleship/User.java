@@ -25,7 +25,7 @@ public class User extends Player implements ActionListener {
 	public synchronized String getGuess() {
 		String guess = getInput();
 		if(!getUnguessedCells().contains(guess)){
-			int confirm = JOptionPane.showConfirmDialog(textField.getTopLevelAncestor(), guess + " is not a valid unused guess. Are you sure you want to use that?");
+			int confirm = JOptionPane.showConfirmDialog(textField.getTopLevelAncestor(), guess + " is not a valid unused guess. Are you sure you want to use that?", "Confirm",JOptionPane.YES_NO_OPTION);
 			if(confirm != JOptionPane.YES_OPTION)
 				return getGuess();
 		}
@@ -44,11 +44,13 @@ public class User extends Player implements ActionListener {
 			} catch (IllegalArgumentException ex) {
 				JOptionPane.showMessageDialog(textField.getTopLevelAncestor(), ex.getMessage());
 				i--;
+			} catch (NullPointerException ex){
+				System.exit(0);
 			}
 		}
 	}
 
-	public ArrayList<String> getPlacement(String shipName, int shipSize) {
+	public ArrayList<String> getPlacement(String shipName, int shipSize) throws NullPointerException {
 		String placement = JOptionPane.showInputDialog(
 				textField.getTopLevelAncestor(), "Enter coordinates for "
 						+ shipName + " (size " + shipSize + ")");
