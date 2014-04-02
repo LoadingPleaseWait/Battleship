@@ -56,6 +56,23 @@ public class Ship implements Serializable {
 				: locations.get(0).substring(1);
 		for (String cell : locations)
 			broken |= !cell.contains(similarity);
+		boolean vertical = similarity.equals(locations.get(0).substring(0,1));
+		boolean foundEnd = false;
+		for(String cell : locations){
+			String nextCell = null;
+			if(vertical){
+				nextCell = similarity + (Integer.parseInt(cell.substring(1)) + 1);
+			}else{
+				char change = cell.charAt(0);
+				nextCell = ++change + similarity;
+			}
+			if(!locations.contains(nextCell)){
+				if(foundEnd)
+					broken = true;
+				else
+					foundEnd = true;
+			}
+		}
 		if (broken)
 			throw new IllegalArgumentException(
 					"Ships cannot be placed that way " + locations);
