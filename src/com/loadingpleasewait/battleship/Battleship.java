@@ -42,7 +42,6 @@ public class Battleship implements Serializable {
 			}
 			game.endGame();
 		} while (game.wantsToPlayAgain());
-		//System.exit(0);
 	}
 
 	public void setUpGame() {
@@ -129,7 +128,7 @@ public class Battleship implements Serializable {
 
 		getFrame().add(BorderLayout.WEST, board1Graphics);
 		getFrame().add(BorderLayout.EAST, board2Graphics);
-		// constantly update
+		// constantly repaint boards with lambda expressions
 		new Thread(() -> {
 			while (true) {
 				board1Graphics.repaint();

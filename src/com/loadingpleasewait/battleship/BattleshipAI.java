@@ -32,18 +32,23 @@ public class BattleshipAI extends Player {
 		String guess = null;
 		if (possiblePlacement != null) {
 			if (getDifficulty().equals("Hard")) {
+				// guess a square based on how many ways a ship could be placed there
 				int mostPlacements = -1;
+				ArrayList<String> guessChoices = new ArrayList<String>();
 				for (String cell : possiblePlacement) {
 					if (getPossiblePlacements(cell,
 							getGuessBoard().smallestShipSize()).size() > mostPlacements) {
 						mostPlacements = getPossiblePlacements(cell,
 								getGuessBoard().smallestShipSize()).size();
-						guess = cell;
-					}
+						guessChoices.clear();
+						guessChoices.add(cell);
+					}else if(getPossiblePlacements(cell,
+							getGuessBoard().smallestShipSize()).size() == mostPlacements)
+						guessChoices.add(cell);
 				}
 			} else
 				guess = possiblePlacement
-						.remove((int) (Math.random() * possiblePlacement.size()));
+						.get((int) (Math.random() * possiblePlacement.size()));
 		} else
 			guess = randomGuess();
 		String result = getGuessBoard().checkGuess(guess);

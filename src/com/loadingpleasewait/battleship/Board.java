@@ -24,7 +24,6 @@ public class Board implements Serializable {
 		guesses = new ArrayList<String>();
 		setHits(new ArrayList<String>());
 		setMisses(new ArrayList<String>());
-		//System.out.println(getShips());
 	}
 
 	/**
