@@ -130,27 +130,35 @@ public class Battleship implements Serializable {
 		getFrame().add(BorderLayout.WEST, board1Graphics);
 		getFrame().add(BorderLayout.EAST, board2Graphics);
 		// constantly update
-		new Thread(() -> {
-			while (true) {
-				board1Graphics.repaint();
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (true) {
+					board1Graphics.repaint();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
-		}).start();// dat lambda expression
+		}).start();// dat lambda expression to anonymous class
 
-		new Thread(() -> {
-			while (true) {
-				board2Graphics.repaint();
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				while (true) {
+					board2Graphics.repaint();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
-		}).start();// dat second lambda expression
+		}).start();// lambda converted to anonymous class
 
 		getFrame().setSize(Board.BOARD_WIDTH * 2, 850);
 		getFrame().setVisible(true);
