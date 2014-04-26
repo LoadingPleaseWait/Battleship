@@ -2,6 +2,7 @@ package com.loadingpleasewait.battleship;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -16,16 +17,16 @@ public class User extends Player implements ActionListener {
 	private String input;
 	private boolean isUserTurn;
 
-	public User(Board playerBoard, Board guessBoard, JTextField field) {
+	public User(Board playerBoard, Board guessBoard, JTextField field) throws RemoteException{
 		super(playerBoard, guessBoard);
-		textField = field;
+		setTextField(field);
 	}
 
 	@Override
 	public synchronized String getGuess() {
 		String guess = getInput();
 		if(!getUnguessedCells().contains(guess)){
-			int confirm = JOptionPane.showConfirmDialog(textField.getTopLevelAncestor(), guess + " is not a valid unused guess. Are you sure you want to use that?", "Confirm",JOptionPane.YES_NO_OPTION);
+			int confirm = JOptionPane.showConfirmDialog(getTextField().getTopLevelAncestor(), guess + " is not a valid unused guess. Are you sure you want to use that?", "Confirm",JOptionPane.YES_NO_OPTION);
 			if(confirm != JOptionPane.YES_OPTION)
 				return getGuess();
 		}
@@ -36,13 +37,13 @@ public class User extends Player implements ActionListener {
 
 	@Override
 	public synchronized void placeShips() {
-		textField.addActionListener(this);
+		getTextField().addActionListener(this);
 		for (int i = 0; i < 5; i++) {
 			try {
 				getPlayerBoard().placeShip(Ship.NAMES[i],
 						getPlacement(Ship.NAMES[i], Ship.SIZES[i]));
 			} catch (IllegalArgumentException ex) {
-				JOptionPane.showMessageDialog(textField.getTopLevelAncestor(), ex.getMessage());
+				JOptionPane.showMessageDialog(getTextField().getTopLevelAncestor(), ex.getMessage());
 				i--;
 			} catch (NullPointerException ex){
 				System.exit(0);
@@ -52,7 +53,7 @@ public class User extends Player implements ActionListener {
 
 	public ArrayList<String> getPlacement(String shipName, int shipSize) throws NullPointerException {
 		String placement = JOptionPane.showInputDialog(
-				textField.getTopLevelAncestor(), "Enter coordinates for "
+				getTextField().getTopLevelAncestor(), "Enter coordinates for "
 						+ shipName + " (size " + shipSize + ")");
 		if (placement.equals("r"))
 			return getPlayerBoard().randomPlacement(shipSize);
@@ -84,9 +85,23 @@ public class User extends Player implements ActionListener {
 	public void actionPerformed(ActionEvent event) {
 		if(!isUserTurn)
 			return;
-		input = textField.getText().toLowerCase();
+		input = getTextField().getText().toLowerCase();
 		waiting = false;
-		textField.setText("");
-		textField.requestFocus();
+		getTextField().setText("");
+		getTextField().requestFocus();
+	}
+
+	/**
+	 * @return the textField
+	 */
+	public synchronized JTextField getTextField() {
+		return textField;
+	}
+
+	/**
+	 * @param textField the textField to set
+	 */
+	protected synchronized void setTextField(JTextField textField) {
+		this.textField = textField;
 	}
 }

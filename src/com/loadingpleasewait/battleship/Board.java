@@ -25,6 +25,13 @@ public class Board implements Serializable {
 		setHits(new ArrayList<String>());
 		setMisses(new ArrayList<String>());
 	}
+	
+	public Board(Board otherBoard){
+		setShips(otherBoard.getShips());
+		guesses = new ArrayList<String>();
+		setHits(new ArrayList<String>());
+		setMisses(new ArrayList<String>());
+	}
 
 	/**
 	 * @return the ships

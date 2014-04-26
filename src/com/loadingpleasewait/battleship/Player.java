@@ -1,9 +1,11 @@
 package com.loadingpleasewait.battleship;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
-public abstract class Player implements Serializable{
+public abstract class Player extends UnicastRemoteObject implements Serializable{
 	
 	private static final long serialVersionUID = -8494487276578313523L;
 	
@@ -16,7 +18,8 @@ public abstract class Player implements Serializable{
 	 * @param playerBoard
 	 * @param guessBoard
 	 */
-	public Player(Board playerBoard, Board guessBoard) {
+	public Player(Board playerBoard, Board guessBoard) throws RemoteException{
+		super(0);
 		this.playerBoard = playerBoard;
 		this.guessBoard = guessBoard;
 		//set unguessed cells

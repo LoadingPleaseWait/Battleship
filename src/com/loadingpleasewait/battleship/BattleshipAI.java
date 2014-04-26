@@ -1,5 +1,6 @@
 package com.loadingpleasewait.battleship;
 
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 
 public class BattleshipAI extends Player {
@@ -14,12 +15,12 @@ public class BattleshipAI extends Player {
 	private ArrayList<String> foundShips;
 	private ArrayList<String> recentHits;
 
-	public BattleshipAI(Board playerBoard, Board opponentBoard) {
+	public BattleshipAI(Board playerBoard, Board opponentBoard) throws RemoteException{
 		super(playerBoard, opponentBoard);
 	}
 
 	public BattleshipAI(Board playerBoard, Board opponentBoard,
-			String difficultySetting) {
+			String difficultySetting) throws RemoteException{
 		this(playerBoard, opponentBoard);
 		setDifficulty(difficultySetting);
 		foundShipCells = new ArrayList<String>();
