@@ -55,10 +55,20 @@ public class RemoteUser extends User implements RemotePlayer {
 			}
 		}
 	}
+	
+	public void showNumber(int number) throws RemoteException {
+		String message = "Correct number was " + number + "\n";
+		//tell user who is going first
+		message += goingFirst ? "You " : "Opponent ";//add name of player that is going first
+		message += "will go first.";
+		JOptionPane.showMessageDialog(getTextField().getTopLevelAncestor(), message);
+		goingFirstSet = true;
+	}
 
 	@Override
 	public void requestGuessNumber() throws RemoteException {
 		// previous numbers were the same so guessing must be done again
+		guessedNumber = -1;
 		guessNumber();
 	}
 
@@ -88,7 +98,7 @@ public class RemoteUser extends User implements RemotePlayer {
 	}
 
 	@Override
-	public synchronized String getRemoteGuess() throws RemoteException {
+	public String getRemoteGuess() throws RemoteException {
 		// wait for local user to guess
 		while (lastGuess == null) {
 			try {
@@ -162,7 +172,6 @@ public class RemoteUser extends User implements RemotePlayer {
 	@Override
 	public void setGoingFirst(boolean goingFirst) throws RemoteException {
 		this.goingFirst = goingFirst;
-		goingFirstSet = true;
 	}
 
 }

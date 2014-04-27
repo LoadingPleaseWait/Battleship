@@ -29,7 +29,7 @@ public class BattleshipAI extends Player {
 	}
 
 	@Override
-	public String getGuess() {
+	public synchronized String getGuess() {
 		String guess = null;
 		if (possiblePlacement != null) {
 			if (getDifficulty().equals("Hard")) {
@@ -37,24 +37,21 @@ public class BattleshipAI extends Player {
 				int mostPlacements = -1;
 				ArrayList<String> guessChoices = new ArrayList<String>();
 				for (String cell : possiblePlacement) {
-					if (getPossiblePlacements(cell,
-							getGuessBoard().smallestShipSize()).size() > mostPlacements) {
-						mostPlacements = getPossiblePlacements(cell,
-								getGuessBoard().smallestShipSize()).size();
+					if (getPossiblePlacements(cell, getGuessBoard().smallestShipSize()).size() > mostPlacements) {
+						mostPlacements = getPossiblePlacements(cell, getGuessBoard().smallestShipSize()).size();
 						guessChoices.clear();
 						guessChoices.add(cell);
-					}else if(getPossiblePlacements(cell,
-							getGuessBoard().smallestShipSize()).size() == mostPlacements)
+					} else if (getPossiblePlacements(cell, getGuessBoard().smallestShipSize()).size() == mostPlacements)
 						guessChoices.add(cell);
 				}
+				guess = guessChoices.get((int)(Math.random() * guessChoices.size()));
 			} else
-				guess = possiblePlacement
-						.get((int) (Math.random() * possiblePlacement.size()));
+				guess = possiblePlacement.get((int) (Math.random() * possiblePlacement.size()));
 		} else
 			guess = randomGuess();
 		String result = getGuessBoard().checkGuess(guess);
-		getGuessedCells().add(
-				getUnguessedCells().remove(getUnguessedCells().indexOf(guess)));
+		assert (getUnguessedCells().contains(guess)) : "unguessed cells did not contain guess: " + guess;
+		getGuessedCells().add(getUnguessedCells().remove(getUnguessedCells().indexOf(guess)));
 
 		// what do to after finding a ship
 		if (!getDifficulty().equals("Easy")) {
@@ -229,6 +226,7 @@ public class BattleshipAI extends Player {
 		double mostPlacements = -1;
 		ArrayList<String> goodCells = new ArrayList<String>();
 		for (String cell : getUnguessedCells()) {
+			assert (cell != null) : "an unguessed cell was null";
 			if (getPossiblePlacements(cell, getGuessBoard().largestShipSize())
 					.size() > mostPlacements) {
 				mostPlacements = getPossiblePlacements(cell,
@@ -239,6 +237,7 @@ public class BattleshipAI extends Player {
 					getGuessBoard().largestShipSize()).size() == mostPlacements)
 				goodCells.add(cell);
 		}
+		assert(getUnguessedCells().containsAll(goodCells)) : "unguessed cells did not contain a possible guess";
 		return goodCells.get((int) (Math.random() * goodCells.size()));
 	}
 

@@ -9,6 +9,8 @@ public interface RemotePlayer extends Remote {
 	
 	public void requestGuessNumber() throws RemoteException;
 	
+	public void showNumber(int number) throws RemoteException;
+	
 	public boolean wantsRematch() throws RemoteException;
 	
 	public String getRemoteGuess() throws RemoteException;

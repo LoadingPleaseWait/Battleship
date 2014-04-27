@@ -1,6 +1,7 @@
 package com.loadingpleasewait.battleship;
 
-import java.rmi.Remote;
+import java.io.IOException;
+import java.rmi.MarshalledObject;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
@@ -14,8 +15,8 @@ public class RemotePlaceHolder extends UnicastRemoteObject implements PlaceHolde
 	}
 
 	@Override
-	public void proxyRebind(Remote obj) throws RemoteException {
-		LocateRegistry.getRegistry().rebind(Battleship.JOINER, obj);
+	public void proxyRebind(MarshalledObject<? extends RemoteUser> obj) throws ClassNotFoundException, IOException{
+		LocateRegistry.getRegistry().rebind(Battleship.JOINER, obj.get());
 	}
 
 }

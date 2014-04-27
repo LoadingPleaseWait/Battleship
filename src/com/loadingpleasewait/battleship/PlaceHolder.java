@@ -1,5 +1,7 @@
 package com.loadingpleasewait.battleship;
 
+import java.io.IOException;
+import java.rmi.MarshalledObject;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -12,7 +14,9 @@ public interface PlaceHolder extends Remote {
 	 * @param obj
 	 *            a reference to a remote object (usually a stub)
 	 * @throws RemoteException
+	 * @throws IOException 
+	 * @throws ClassNotFoundException
 	 */
-	public void proxyRebind(Remote obj) throws RemoteException;
+	public void proxyRebind(MarshalledObject<? extends RemoteUser> obj) throws RemoteException, ClassNotFoundException, IOException;
 
 }

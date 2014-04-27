@@ -37,7 +37,7 @@ public class User extends Player implements ActionListener {
 
 	@Override
 	public synchronized void placeShips() {
-		getTextField().addActionListener(this);
+		textField.addActionListener(this);
 		for (int i = 0; i < 5; i++) {
 			try {
 				getPlayerBoard().placeShip(Ship.NAMES[i],
@@ -94,7 +94,7 @@ public class User extends Player implements ActionListener {
 	/**
 	 * @return the textField
 	 */
-	public synchronized JTextField getTextField() {
+	public JTextField getTextField() {
 		return textField;
 	}
 

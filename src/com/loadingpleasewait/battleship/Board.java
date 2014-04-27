@@ -27,7 +27,7 @@ public class Board implements Serializable {
 	}
 	
 	public Board(Board otherBoard){
-		setShips(otherBoard.getShips());
+		ships = new ArrayList<Ship>(otherBoard.ships);
 		guesses = new ArrayList<String>();
 		setHits(new ArrayList<String>());
 		setMisses(new ArrayList<String>());
@@ -279,9 +279,13 @@ public class Board implements Serializable {
 			}
 			pen.setColor(Color.WHITE);
 			for (String cell : getMisses()) {
-				pen.fillRect((cell.charAt(0) - 97) * 60 + 28,
-						(Integer.parseInt(cell.substring(1)) - 1) * 60 + 28,
-						CELL_SIZE, CELL_SIZE);
+				try{
+					pen.fillRect((cell.charAt(0) - 97) * 60 + 28,
+							(Integer.parseInt(cell.substring(1)) - 1) * 60 + 28,
+							CELL_SIZE, CELL_SIZE);
+				}catch (NullPointerException ex){
+
+				}
 			}
 
 		}

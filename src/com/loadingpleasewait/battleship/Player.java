@@ -29,6 +29,7 @@ public abstract class Player extends UnicastRemoteObject implements Serializable
 				unguessedCells.add(((char)(i)) + String.valueOf(num));
 			}
 		}
+		assert(!getUnguessedCells().contains(null)) : "unguessed cell " + getUnguessedCells().indexOf(null) + " was null";
 		setGuessedCells(new ArrayList<String>());
 	}
 
@@ -70,21 +71,21 @@ public abstract class Player extends UnicastRemoteObject implements Serializable
 	/**
 	 * @return the unguessedCells
 	 */
-	public ArrayList<String> getUnguessedCells() {
+	public synchronized ArrayList<String> getUnguessedCells() {
 		return unguessedCells;
 	}
 
 	/**
 	 * @return the guessedCells
 	 */
-	public ArrayList<String> getGuessedCells() {
+	public synchronized ArrayList<String> getGuessedCells() {
 		return guessedCells;
 	}
 
 	/**
 	 * @param guessedCells the guessedCells to set
 	 */
-	public void setGuessedCells(ArrayList<String> guessedCells) {
+	public synchronized void setGuessedCells(ArrayList<String> guessedCells) {
 		this.guessedCells = guessedCells;
 	}
 }
