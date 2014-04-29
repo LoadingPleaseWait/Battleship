@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2014  Michael Murphey
+ * 
+ * This file is part of Battleship LPW.
+ * 
+ * Battleship LPW is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option) any
+ * later version.
+ * 
+ * Battleship LPW is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * Battleship LPW. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.loadingpleasewait.battleship;
 
 import java.rmi.RemoteException;
@@ -37,15 +56,16 @@ public class RemoteUser extends User implements RemotePlayer {
 	}
 
 	/**
+	 * ask user to guess a number and set the instance variable
+	 * 
 	 * @throws NullPointerException
 	 *             user exited option pane
 	 */
 	public void guessNumber() throws NullPointerException {
-		// ask user to guess a number
 		while (guessedNumber == -1) {
 			try {
 				guessedNumber = Integer.parseInt(JOptionPane.showInputDialog(getTextField().getTopLevelAncestor(),
-						"Enter number between 1 and 1000. Whoever's number is closer gets to go first."));
+						"Enter number between 1 and 1000. Whoever's number is closer to the one I'm thinking of picks who goes first. If neither is closer we will guess again."));
 			} catch (NumberFormatException ex) {
 
 			}
@@ -56,13 +76,29 @@ public class RemoteUser extends User implements RemotePlayer {
 		}
 	}
 	
-	public void showNumber(int number) throws RemoteException {
-		String message = "Correct number was " + number + "\n";
+	@Override
+	public void showNumber(int correctNumber, int opponentNumber) throws RemoteException {
+		String message = "Correct number was " + correctNumber + "\n";
+		message += "Opponent guessed " + opponentNumber + "\n";
 		//tell user who is going first
 		message += goingFirst ? "You " : "Opponent ";//add name of player that is going first
 		message += "will go first.";
 		JOptionPane.showMessageDialog(getTextField().getTopLevelAncestor(), message);
 		goingFirstSet = true;
+	}
+	
+	@Override
+	public boolean wantsToGoFirst() throws RemoteException {
+		int choice = JOptionPane.NO_OPTION;
+		try {
+			// ask user if they want a to go first or second with an option pane
+			choice = JOptionPane.showConfirmDialog(getTextField().getTopLevelAncestor(), "Would you like to go first?",
+					"Rematch", JOptionPane.YES_NO_OPTION);
+		} catch (NullPointerException ex) {
+			notifyOpponentExit();
+			System.exit(0);
+		}
+		return choice == JOptionPane.YES_OPTION;
 	}
 
 	@Override
@@ -81,20 +117,25 @@ public class RemoteUser extends User implements RemotePlayer {
 				ex.printStackTrace();
 			}
 		}
+		rematchRequested = false;
 		return rematch;
 	}
 
-	public void requestRematch() {
-		int choice = JOptionPane.NO_OPTION;
-		try {
-			// ask user if they want a rematch with an option pane
-			choice = JOptionPane.showConfirmDialog(getTextField().getTopLevelAncestor(), "Would you like a rematch?",
-					"Rematch", JOptionPane.YES_NO_OPTION);
-		} catch (NullPointerException ex) {
-
-		}
-		rematch = choice == JOptionPane.YES_OPTION;
+	/**
+	 * @param rematch the rematch to set
+	 */
+	public void setRematch(boolean rematch) {
+		this.rematch = rematch;
 		rematchRequested = true;
+	}
+	
+	/**
+	 * reset state
+	 */
+	public void reset(){
+		guessedNumber = -1;
+		goingFirstSet = false;
+		placedShips = false;
 	}
 
 	@Override
@@ -141,6 +182,7 @@ public class RemoteUser extends User implements RemotePlayer {
 
 	@Override
 	public void notifyOpponentExit() throws RemoteException {
+		JOptionPane.showMessageDialog(getTextField().getTopLevelAncestor(), "Opponent has left");
 		opponentLeft = true;
 	}
 
