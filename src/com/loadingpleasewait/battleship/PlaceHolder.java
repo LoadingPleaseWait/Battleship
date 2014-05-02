@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014  Michael Murphey
  * 
  * This file is part of Battleship LPW.

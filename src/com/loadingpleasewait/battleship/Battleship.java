@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014  Michael Murphey
  * 
  * This file is part of Battleship LPW.
@@ -38,6 +38,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
@@ -138,6 +139,9 @@ public class Battleship implements Serializable {
 		isRemoteGame = connectionOptions.getValue().toString().equals(LAN_OPTION);
 	}
 
+	/**
+	 * Start a game only using this system
+	 */
 	public void setUpGame() {
 		turns = 0;
 
@@ -222,17 +226,28 @@ public class Battleship implements Serializable {
 		textField.requestFocus();
 	}
 
+	/**
+	 * Start a game that uses a LAN connection
+	 */
 	public void setUpRemoteGame() {
 		// set up GUI and connection
 		setUpGUI();
 		
-		//if this is a rematch don't reconnect
+		//if this is a rematch don't reconnect but do reset turn order
 		if(remoteOpponent == null)
 			connect();
 		else if(isHost)
 			setTurnOrder();
-		else
-			localUser.guessNumber();
+		else{
+			try{
+				localUser.guessNumber();
+			}catch (NullPointerException ex){
+				exitDuringSetup();
+			} catch (InterruptedException ex){
+				lostConnection = true;
+				return;
+			}
+		}
 
 		//blank guess board when user is placing ships
 		board2Graphics = new Board().new BoardGraphics(false);
@@ -263,21 +278,17 @@ public class Battleship implements Serializable {
 					showFatalError(ex);
 				}
 			}
-		} catch (RemoteException ex) {
-			JOptionPane.showMessageDialog(getFrame(), "Lost connection to opponent");
-			lostConnection = true;
-		}
 
-		// set the guess board after opponent has placed ships
-		try {
+			// set the guess board after opponent has placed ships
 			localUser.setGuessBoard(new Board(remoteOpponent.getRemotePlayerBoard()));
 			board2 = localUser.getGuessBoard();
-			
+
 			getFrame().getContentPane().remove(board2Graphics);
 			board2Graphics = board2.new BoardGraphics(false);
 			getFrame().getContentPane().add(board2Graphics);
 		} catch (RemoteException ex) {
-			JOptionPane.showMessageDialog(getFrame(), "Lost connection to opponent");
+			if(!lostConnection)
+				JOptionPane.showMessageDialog(getFrame(), "Lost connection to opponent");
 			lostConnection = true;
 		}
 
@@ -339,7 +350,7 @@ public class Battleship implements Serializable {
 		// ask user if they want to host
 		JOptionPane connectionOptions = new JOptionPane("Create or join game");
 		connectionOptions.setOptions(new String[] { "Host", "Join" });
-		connectionOptions.createDialog(frame, "Battleship").setVisible(true);
+		connectionOptions.createDialog(frame, "Battleship LPW").setVisible(true);
 		try {
 			while (connectionOptions.getValue().toString() == null) {
 				// wait for selection
@@ -447,6 +458,7 @@ public class Battleship implements Serializable {
 			}	).start();
 			});
 
+			// second attempt to find host
 			if (address.equals("not found")) {
 				addresses.parallelStream().forEach(possibleAddress -> {
 					if (addresses.equals("not found")) {
@@ -467,19 +479,19 @@ public class Battleship implements Serializable {
 				});
 			}
 
-			// wait for serverFinder to finish
+			// wait for host finding threads to finish
 			while (address.equals("not found") && progressBar.getValue() < progressBar.getMaximum() - 1) {
 				try {
 					Thread.sleep(50);
 				} catch (InterruptedException ex) {
-					ex.printStackTrace();
+					showFatalError(ex);
 				}
 			}
 
-			// if no valid server address is found exit
+			// if no valid host address is found exit
 			if (address.equals("not found")) {
 				JOptionPane.showMessageDialog(frame, "No host was found");
-				System.exit(1);
+				System.exit(0);
 			}
 
 			// bind and look up objects
@@ -500,6 +512,19 @@ public class Battleship implements Serializable {
 				showFatalError("Invalid data recieved");
 			} catch (ClassNotFoundException | IOException ex) {
 				showFatalError(ex);
+			} catch(NullPointerException ex){
+				exitDuringSetup();
+				
+				// allow the message to be sent
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException ex1) {
+					
+				}
+				
+				System.exit(0);
+			} catch (InterruptedException ex){
+				lostConnection = true;
 			}
 
 		}
@@ -518,6 +543,7 @@ public class Battleship implements Serializable {
 
 		private Thread thread;
 		private int delay;
+		private long start;
 
 		/**
 		 * @param thread
@@ -532,9 +558,12 @@ public class Battleship implements Serializable {
 
 		@Override
 		public void run() {
+			if(start == 0)
+				start = System.currentTimeMillis();
 			// sleep for delay then interrupt the thread
 			try {
-				sleep(delay);
+				while(start + delay > System.currentTimeMillis())
+					sleep(50);
 			} catch (InterruptedException ex) {
 
 			}
@@ -558,59 +587,69 @@ public class Battleship implements Serializable {
 			getFrame().add(BorderLayout.NORTH, topPanel);
 		}
 		
-		// make text components if this is not a rematch
-		if(textField == null){
-			textField = new JTextField();
-			textArea = new JTextArea();
-			textArea.setWrapStyleWord(true);
-			textArea.setWrapStyleWord(true);
-			textArea.setEditable(false);
+		// create text components
+		textField = new JTextField();
+		textArea = new JTextArea();
+		textArea.setWrapStyleWord(true);
+		textArea.setWrapStyleWord(true);
+		textArea.setEditable(false);
+		
+		if(localUser != null)
+			localUser.setTextField(getTextField());
 
-			// automatically scroll down
-			if(textArea.getCaret() instanceof DefaultCaret){
-				caret = (DefaultCaret) textArea.getCaret();
-				caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-				textArea.setCaret(caret);
-			}
-
-			scroller = new JScrollPane(textArea);
-			scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-			scroller.setAutoscrolls(true);
-			scroller.setPreferredSize(new Dimension(WINDOW_WIDTH - 50, 115));
-
-			JPanel text = new JPanel();
-			text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
-			text.add(scroller);
-			text.add(textField);
-			text.setPreferredSize(new Dimension(WINDOW_WIDTH - 50, 135));
-
-			getFrame().add(BorderLayout.SOUTH, text);
+		// automatically scroll down
+		if(textArea.getCaret() instanceof DefaultCaret){
+			caret = (DefaultCaret) textArea.getCaret();
+			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+			textArea.setCaret(caret);
 		}
+
+		scroller = new JScrollPane(textArea);
+		scroller.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		scroller.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		scroller.setAutoscrolls(true);
+		scroller.setPreferredSize(new Dimension(WINDOW_WIDTH - 50, 115));
+
+		JPanel text = new JPanel();
+		text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+		text.add(scroller);
+		text.add(textField);
+		text.setPreferredSize(new Dimension(WINDOW_WIDTH - 50, 135));
+
+		getFrame().add(BorderLayout.SOUTH, text);
 	}
 
 	public void setTurnOrder() {
-		int correctNumber = (int) (Math.random() * (RemoteUser.MAX_GUESS + 1));
+		int correctNumber = (int) (Math.random() * RemoteUser.MAX_GUESS) + 1;
 
 		// ask user to guess a number
 		try {
 			localUser.guessNumber();
-		} catch (NullPointerException ex) {
-			// user exited window
-			try {
-				remoteOpponent.notifyOpponentExit();
-			} catch (RemoteException ex1) {
 
-			}
-			System.exit(0);
-		}
-
-		try {
 			// if they guess the same number they will have to guess again
 			while (Math.abs(correctNumber - localUser.getNumberGuess()) == Math.abs(correctNumber
 					- remoteOpponent.getNumberGuess())) {
-				localUser.requestGuessNumber();
-				remoteOpponent.requestGuessNumber();
+				//thread requestGuessNumber() so both players reguess at the same time and can exit
+				new Thread(() -> {
+					try {
+						localUser.requestGuessNumber();
+					} catch (RemoteException ex) {
+						
+					} catch (NullPointerException ex){
+						exitDuringSetup();
+					}
+				}).start();
+				try{
+					remoteOpponent.requestGuessNumber();
+				}catch (NullPointerException ex){
+					new Thread(() -> {
+						try {
+							localUser.notifyOpponentExit();
+						} catch (RemoteException ex1) {
+
+						}
+					}).start();
+				}
 			}
 			
 			boolean localGoesFirst;
@@ -634,9 +673,13 @@ public class Battleship implements Serializable {
 				}
 			}).start();
 			localUser.showNumber(correctNumber , remoteOpponent.getNumberGuess());
-
+			
 		} catch (RemoteException ex) {
-			showFatalError(ex);
+			
+		} catch (InterruptedException ex){
+			lostConnection = true;//opponent exited
+		} catch (NullPointerException ex) {
+			exitDuringSetup();// user exited window
 		}
 
 	}
@@ -648,11 +691,35 @@ public class Battleship implements Serializable {
 	 *            object containing information for the error message
 	 */
 	protected void showFatalError(Object error) {
-		JOptionPane.showMessageDialog(getFrame(), error);
+		if(!lostConnection)
+			JOptionPane.showMessageDialog(getFrame(), error);
+		System.exit(0);
+	}
+	
+	/**
+	 * Tell opponent we are exiting and exit
+	 */
+	protected void exitDuringSetup(){
+		//thread telling the opponent that the user is exiting
+		new Thread(() -> {
+			try {
+				remoteOpponent.notifyOpponentExit();
+			} catch (RemoteException ex1) {
+
+			}
+		}).start();
+		lostConnection = true;
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException ex) {
+			
+		}
 		System.exit(0);
 	}
 
-	// goes through a turn
+	/**
+	 * Go through a turn
+	 */
 	public void playTurn() {
 		if (isRemoteGame) {
 			//scroll down
@@ -705,9 +772,10 @@ public class Battleship implements Serializable {
 		reset();
 	}
 	
+	/**
+	 * reset state before a rematch
+	 */
 	public void reset(){
-		// reset state before a rematch
-		
 		turns = 0;
 		
 		updater1.interrupt();
@@ -746,8 +814,10 @@ public class Battleship implements Serializable {
 		}
 	}
 
+	/**
+	 * ask user what they want to do after game is over
+	 */
 	public void choosePlayAgainOption() {
-		//ask user what they want to do after game is over
 		JOptionPane options = new JOptionPane("Would you like to play again?");
 		try{
 			options.setOptions(new String[] { "Rematch", "Main Menu", "Quit" });
@@ -761,20 +831,10 @@ public class Battleship implements Serializable {
 				}
 			}
 			if(options.getValue().toString().equals("Quit")){
-				if(isRemoteGame)
-					remoteOpponent.notifyOpponentExit();
 				System.exit(0);
 			}
 		}catch (NullPointerException ex){
-			if(isRemoteGame)
-				try {
-					remoteOpponent.notifyOpponentExit();
-				} catch (RemoteException ex1) {
-					
-				}
 			System.exit(0);
-		}catch (RemoteException ex){
-			showFatalError(ex);
 		}
 		endOption = options.getValue().toString();
 		
@@ -783,7 +843,8 @@ public class Battleship implements Serializable {
 			boolean opponentWantsRematch = false;
 			try{
 				localUser.setRematch(endOption.equals("Rematch"));
-				opponentWantsRematch = remoteOpponent.wantsRematch();
+				if(endOption.equals("Rematch"))
+					opponentWantsRematch = remoteOpponent.wantsRematch();
 			}catch (RemoteException ex){
 				
 			}
@@ -806,6 +867,16 @@ public class Battleship implements Serializable {
 					System.exit(0);
 				}
 				endOption = options2.getValue().toString();
+			}
+			if(endOption.equals("Main Menu") && isHost){
+				try {
+					//unbind the user objects
+					registry.unbind(HOST);
+					registry.unbind(JOINER);
+					UnicastRemoteObject.unexportObject(registry, true);//destroy registry
+				} catch (RemoteException | NotBoundException ex) {
+					showFatalError(ex);
+				}
 			}
 		}
 	}

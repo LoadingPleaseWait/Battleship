@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014  Michael Murphey
  * 
  * This file is part of Battleship LPW.
@@ -26,7 +26,7 @@ public interface RemotePlayer extends Remote {
 
 	public int getNumberGuess() throws RemoteException;
 
-	public void requestGuessNumber() throws RemoteException;
+	public void requestGuessNumber() throws RemoteException, NullPointerException;
 
 	public boolean wantsToGoFirst() throws RemoteException;
 

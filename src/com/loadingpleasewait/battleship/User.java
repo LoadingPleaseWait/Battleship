@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2014  Michael Murphey
  * 
  * This file is part of Battleship LPW.
@@ -120,7 +120,7 @@ public class User extends Player implements ActionListener {
 	/**
 	 * @param textField the textField to set
 	 */
-	protected synchronized void setTextField(JTextField textField) {
+	public synchronized void setTextField(JTextField textField) {
 		this.textField = textField;
 	}
 }
