@@ -6,7 +6,7 @@ Just the game with a simple swing GUI,a computer opponent and multiplayer over L
 [Download and play the game here!](https://github.com/LoadingPleaseWait/Battleship/releases/download/v1.3/BattleshipLPW.jar)
 
 If you have a version of Java older than Java 8 [download here]
-(https://github.com/LoadingPleaseWait/Battleship/releases/download/v1.1-old/Battleship.jar).
+(https://github.com/LoadingPleaseWait/Battleship/releases/download/1.2/BattleshipLPW.jar).
 
 ### Licensing
 
