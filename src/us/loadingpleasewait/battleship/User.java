@@ -17,7 +17,7 @@
  * Battleship LPW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.loadingpleasewait.battleship;
+package us.loadingpleasewait.battleship;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,9 +45,8 @@ public class User extends Player implements ActionListener {
 	public synchronized String getGuess() {
 		String guess = getInput();
 		if(!getUnguessedCells().contains(guess)){
-			int confirm = JOptionPane.showConfirmDialog(getTextField().getTopLevelAncestor(), guess + " is not a valid unused guess. Are you sure you want to use that?", "Confirm",JOptionPane.YES_NO_OPTION);
-			if(confirm != JOptionPane.YES_OPTION)
-				return getGuess();
+			JOptionPane.showMessageDialog(getTextField().getTopLevelAncestor(), guess + " is not a valid unused guess.");
+			return getGuess();
 		}
 		String result = getGuessBoard().checkGuess(guess);
 		getGuessedCells().add(getUnguessedCells().remove(getUnguessedCells().indexOf(guess)));
@@ -74,7 +73,7 @@ public class User extends Player implements ActionListener {
 		String placement = JOptionPane.showInputDialog(
 				getTextField().getTopLevelAncestor(), "Enter coordinates for "
 						+ shipName + " (size " + shipSize + ")");
-		if (placement.equals("r"))
+		if (placement.startsWith("r"))
 			return getPlayerBoard().randomPlacement(shipSize);
 		ArrayList<String> output = new ArrayList<String>();
 		for (String cell : placement.split(","))

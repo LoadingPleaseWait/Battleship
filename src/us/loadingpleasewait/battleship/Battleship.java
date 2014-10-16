@@ -17,7 +17,7 @@
  * Battleship LPW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.loadingpleasewait.battleship;
+package us.loadingpleasewait.battleship;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -121,6 +121,7 @@ public class Battleship implements Serializable {
 	public Battleship() {
 		frame = new JFrame("Battleship LPW");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
 
 		// ask user for type of game
 		JOptionPane connectionOptions = new JOptionPane("Select game option");

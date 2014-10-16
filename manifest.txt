@@ -1,1 +1,1 @@
-main-class: com.loadingpleasewait.battleship.Battleship
+main-class: us.loadingpleasewait.battleship.Battleship

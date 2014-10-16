@@ -3,12 +3,14 @@ Battleship LPW
 
 Just the game with a simple swing GUI,a computer opponent and multiplayer over LAN.
 
-[Download and play the game here!](https://github.com/LoadingPleaseWait/Battleship/releases/download/v1.3/BattleshipLPW.jar)
+[Download and play the game here!](https://github.com/LoadingPleaseWait/Battleship/releases/download/v1.3.1/BattleshipLPW.jar)
+
+The above version requires Java 8. You can download Java 8 [here](http://www.oracle.com/technetwork/java/javase/downloads/index.html).
 
 If you have a version of Java older than Java 8 [download here]
 (https://github.com/LoadingPleaseWait/Battleship/releases/download/1.2/BattleshipLPW.jar).
 
-### Licensing
+### License
 
 This program is licensed under the [GPL v3](http://www.gnu.org/licenses).
 

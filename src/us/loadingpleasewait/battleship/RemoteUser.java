@@ -17,7 +17,7 @@
  * Battleship LPW. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.loadingpleasewait.battleship;
+package us.loadingpleasewait.battleship;
 
 import java.rmi.RemoteException;
 
